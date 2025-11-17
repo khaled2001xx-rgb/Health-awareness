@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>التوعية الصحية</title>
+<style>
+body{font-family: Arial, "Noto Naskh Arabic", sans-serif;background:#f6f9f7;color:#0b3b2e;padding:20px;}
+.card{max-width:720px;margin:30px auto;padding:22px;border-radius:12px;background:#ffffff;box-shadow:0 6px 20px rgba(0,0,0,0.06);}
+h1,h2{color:#0b5d3e;}
+h1{margin:0 0 10px;font-size:22px;}
+h2{margin:20px 0 10px;font-size:20px;}
+p.lead{margin:0 0 18px;font-size:16px;}
+.tip{font-size:18px;background:#eef9f3;padding:16px;border-radius:10px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;opacity:0;transition:opacity 0.8s;}
+.tip.show{opacity:1;}
+.random-tip{font-size:16px;background:#dff4e1;padding:12px;border-radius:8px;margin-bottom:14px;}
+.btn{display:inline-block;padding:10px 14px;border-radius:8px;background:#0b8a56;color:white;text-decoration:none;cursor:pointer;margin-top:8px;}
+.small{font-size:13px;color:#586a63;margin-top:8px;}
+footer{max-width:720px;margin:8px auto;text-align:center;color:#6a7f77;font-size:13px;}
+.article{background:#dff4e1;padding:12px;margin-bottom:8px;border-radius:8px;cursor:pointer;}
+.article-content{display:none;padding:12px;margin-bottom:8px;background:#eef9f3;border-radius:8px;}
+.modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.4);visibility:hidden;opacity:0;transition:all .18s;z-index:1000;}
+.modal.show{visibility:visible;opacity:1;}
+.modal .box{background:white;padding:18px;border-radius:10px;max-width:420px;width:92%;text-align:right;direction:rtl;}
+iframe{width:100%;border-radius:10px;margin-bottom:14px;}
+.flex-btns{display:flex;gap:8px;}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>التوعية الصحية</h1>
+<p class="lead">نصيحة اليوم تظهر تلقائيًا وتتغير كل يوم - سيتم عرض تذكير صحي عند فتح الصفحة.</p>
+
+<div id="tipBox" class="tip">
+<span id="tipText">جاري تحميل النصيحة...</span>
+<div class="flex-btns">
+<button id="changeTip" class="btn">تغيير النصيحة</button>
+<button id="shareBtn" class="btn">شارك النصيحة مع صديقك</button>
+</div>
+</div>
+
+<div id="randomTip" class="random-tip"></div>
+
+<h2>مقالات وفوائد صحية</h2>
+<div id="articles"></div>
+
+<h2>روابط مفيدة تتعلق بالصحة</h2>
+<div id="videos">
+<ul>
+<li><a href="https://vt.tiktok.com/ZSynL7gTU/" target="_blank">فوائد النوم المبكر</a></li>
+<li><a href="https://vt.tiktok.com/ZSynLE3Ra/" target="_blank">فوائد أكل الفواكه وممارسة الرياضة</a></li>
+</ul>
+</div>
+
+<div class="small">يمكنك فتح هذه الصفحة على جوالك أو جهازك، أو رفعها إلى موقع لتحويلها إلى تطبيق.</div>
+</div>
+
+<footer>© التوعية الصحية</footer>
+
+<!-- Modal -->
+<div id="modal" class="modal" role="dialog" aria-hidden="true">
+<div class="box">
+<h3 id="modalTitle">تذكير صحي</h3>
+<p id="modalMsg"></p>
+<div style="text-align:left;margin-top:12px">
+<button id="closeModal" class="btn" style="background:#0b5d3e">حسناً</button>
+</div>
+</div>
+</div>
+
+<script>
+window.onload=function(){
+
+const tips = [
+"💧 اشرب كوب ماء الآن — الترطيب يحافظ على تركيزك وصحة جلدك.",
+"🏃 امشِ 10 دقائق لتنشيط الدورة الدموية.",
+"🥗 تناول فطور متوازن يحتوي بروتين وخضار لزيادة طاقتك.",
+"🧘‍♂️ خذ استراحة قصيرة بعد كل ساعة عمل: مد رقبتك وتنفس عميق.",
+"🍵 قلّل السكر والمشروبات الغازية، استبدلها بماء أو شاي أعشاب.",
+"🛌 حاول النوم 7-8 ساعات كل ليلة لتحسين التركيز والمزاج.",
+"🍎 أضف وجبة خفيفة صحية كاللبن أو الفواكه بين الوجبات.",
+"🤸‍♂️ قم بتمارين اطالة قصيرة صباحًا لتقليل آلام الظهر.",
+"😄 تذكر الابتسام والتنفس ببطء عند الشعور بالتوتر.",
+"📵 حدد وقتًا رقميًا بدون هاتف قبل النوم لتحسين جودة النوم."
+];
+
+let tipIndex;
+function tipOfDay(){
+  const d=new Date();
+  const str=""+d.getFullYear()+(d.getMonth()+1).toString().padStart(2,'0')+d.getDate().toString().padStart(2,'0');
+  tipIndex=Number(str)%tips.length;
+  return tips[tipIndex];
+}
+
+const tipText=document.getElementById('tipText');
+tipText.textContent=tipOfDay();
+tipText.parentElement.classList.add('show');
+
+// تغيير النصيحة عشوائيًا
+document.getElementById('changeTip').addEventListener('click',()=>{
+  let newIndex;
+  do{
+    newIndex=Math.floor(Math.random()*tips.length);
+  }while(newIndex===tipIndex);
+  tipIndex=newIndex;
+  tipText.textContent=tips[tipIndex];
+});
+
+// مشاركة النصيحة
+document.getElementById('shareBtn').addEventListener('click',()=>{
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(tips[tipIndex]).then(()=>{alert("تم نسخ النصيحة! شاركها مع صديقك الآن 😊");})
+    .catch(()=>{alert("حدث خطأ أثناء نسخ النصيحة.");});
+  }else{alert("نسخ النص غير مدعوم في متصفحك.");}
+});
+
+// المقالات القابلة للنقر
+const articlesData=[
+{name:"التغذية الصحية",content:"تناول الفواكه والخضروات يقلل من خطر الأمراض المزمنة ويحسن المناعة. استبدل الأطعمة الجاهزة بالخيارات الطازجة."},
+{name:"ممارسة الرياضة",content:"المشي، الركض أو التمارين المنزلية 30 دقيقة يوميًا تحسن الدورة الدموية وتقوي العضلات."},
+{name:"النوم الصحي",content:"النوم 7-8 ساعات ليلاً يعزز التركيز ويحسن المزاج، ويحافظ على صحة القلب والعقل."},
+{name:"التحكم بالسكر",content:"قلل تناول المشروبات الغازية والحلويات، وحافظ على مستوى السكر في الدم ضمن الحدود الطبيعية."},
+{name:"العناية بالجلد",content:"الترطيب اليومي وحماية الجلد من الشمس يحافظ على صحته ويقلل التجاعيد."}
+];
+
+const articlesContainer=document.getElementById('articles');
+articlesData.forEach(a=>{
+  const div=document.createElement('div');
+  div.className='article';
+  div.textContent=a.name;
+  const content=document.createElement('div');
+  content.className='article-content';
+  content.textContent=a.content;
+  div.addEventListener('click',()=>{content.style.display=content.style.display==='none'?'block':'none';});
+  articlesContainer.appendChild(div);
+  articlesContainer.appendChild(content);
+});
+
+// التذكير الصحي Modal
+const modal=document.getElementById('modal');
+function showModal(){
+  const randTip=tips[Math.floor(Math.random()*tips.length)];
+  document.getElementById('modalMsg').textContent=randTip;
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden','false');
+}
+document.getElementById('closeModal').addEventListener('click',()=>{
+  modal.classList.remove('show');
+  modal.setAttribute('aria-hidden','true');
+});
+showModal();
+
+// نصائح عشوائية إضافية كل 10 ثواني
+const randomTipBox=document.getElementById('randomTip');
+function showRandomTip(){
+  const rand=tips[Math.floor(Math.random()*tips.length)];
+  randomTipBox.textContent="💡 نصيحة إضافية: "+rand;
+}
+showRandomTip();
+setInterval(showRandomTip,10000);
+
+};
+</script>
+</body>
+</html>
